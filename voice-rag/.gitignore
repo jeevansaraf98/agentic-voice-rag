@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# Environment / secrets
+.venv/
+.env
+
+# Data & indices (rebuildable / large)
+data/index/
+data/raw/third_party/
+*.wav
+*.mp3
+*.m4a
+
+# OS/editor
+.DS_Store
+Thumbs.db

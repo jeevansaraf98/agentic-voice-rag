@@ -1,0 +1,37 @@
+# ================== Agentic Voice-RAG requirements ==================
+# Python libs only. External tools (install separately):
+# - ffmpeg (winget/choco/manual)
+# - Ollama runtime (winget installer)
+# - Piper TTS binary + voice model (download)
+#
+# If torch fails to install from PyPI on your platform,
+# install a CPU wheel via:
+#   python -m pip install --index-url https://download.pytorch.org/whl/cpu torch
+
+fastapi
+uvicorn
+pydantic
+python-multipart
+python-dotenv
+
+# LangChain + agent graph
+langchain
+langchain-community
+langchain-huggingface
+langchain-ollama
+langgraph
+
+# Embeddings + vector store
+sentence-transformers
+faiss
+
+# Speech-to-text
+torch
+openai-whisper
+
+# Optional document loaders (PDFs)
+pypdf
+
+# Frontend & client
+streamlit
+requests

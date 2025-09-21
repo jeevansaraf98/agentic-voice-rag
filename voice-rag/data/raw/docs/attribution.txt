@@ -1,0 +1,11 @@
+# Attribution & Licenses (Fill me in as you fetch external docs)
+- WireGuard official site: https://www.wireguard.com/ (site terms apply)
+- Windows app page: https://www.wireguard.com/install/
+- macOS app (App Store): https://apps.apple.com/app/wireguard/id1451685025
+- OpenVPN community HOWTO: https://openvpn.net/community-docs/how-to.html
+- OpenVPN Connect guides: https://openvpn.net/connect-docs/
+- Tunnelblick (macOS): https://tunnelblick.net/
+- Ubuntu Server docs: https://documentation.ubuntu.com/
+- Red Hat docs: https://docs.redhat.com/
+- ArchWiki (CC BY-SA 4.0): https://wiki.archlinux.org/
+(Add any additional sources you fetch; keep this with your dataset.)
