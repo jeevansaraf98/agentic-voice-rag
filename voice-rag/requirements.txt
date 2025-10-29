@@ -1,37 +1,30 @@
-# ================== Agentic Voice-RAG requirements ==================
-# Python libs only. External tools (install separately):
-# - ffmpeg (winget/choco/manual)
-# - Ollama runtime (winget installer)
-# - Piper TTS binary + voice model (download)
-#
-# If torch fails to install from PyPI on your platform,
-# install a CPU wheel via:
-#   python -m pip install --index-url https://download.pytorch.org/whl/cpu torch
-
+# Python 3.10–3.11 recommended
+# Pinned set to avoid resolver conflicts
 fastapi
 uvicorn
 pydantic
-python-multipart
 python-dotenv
-
-# LangChain + agent graph
-langchain
-langchain-community
-langchain-huggingface
-langchain-ollama
-langgraph
-
-# Embeddings + vector store
-sentence-transformers
-faiss
-
-# Speech-to-text
-torch
-openai-whisper
-
-# Optional document loaders (PDFs)
-pypdf
-
-# Frontend & client
 streamlit
 requests
+
+# LangChain + ecosystem (pinned, mutually compatible)
+langchain>=0.3.24,<0.4
+langchain-community>=0.3.5,<0.4
+langgraph>=0.2.76,<0.3
+langchain-ollama>=0.2.0,<0.4
+langchain-huggingface>=0.1.0,<0.4
+
+
+# RAG stack
+# NOTE: On Apple Silicon, if this fails, try: pip install faiss-cpu==1.7.4
+faiss-cpu
+sentence-transformers==2.6.1
+pypdf==4.3.1
+
+# Whisper STT (needs ffmpeg installed on the system)
+openai-whisper
+
+# Torch for sentence-transformers and whisper
+# For Apple Silicon with CPU-only use this; for Metal (MPS) you can also use 2.3.x
+torch==2.2.2
+torchaudio==2.2.2

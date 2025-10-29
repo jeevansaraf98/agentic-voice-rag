@@ -1,66 +1,66 @@
-import io
-import requests
 import streamlit as st
+import requests
+import os
 
-st.set_page_config(page_title="Agentic Voice‑RAG", page_icon="🎤", layout="centered")
+st.set_page_config(page_title="Voice RAG Agent", page_icon="🗣️", layout="centered")
 
-st.title("🎤 Agentic Voice‑RAG — Streamlit UI")
-st.caption("Speech → RAG → Agent → LLM (local)")
+API_BASE = os.getenv("API_BASE", "http://127.0.0.1:8000")
 
-with st.sidebar:
-    st.header("Server")
-    api_base = st.text_input("FastAPI base URL", "http://127.0.0.1:8000")
-    st.markdown(
-        "- Start backend: `uvicorn app:app --reload`\n"
-        "- Ollama running with a model (e.g., `llama3`)"
-    )
-    st.divider()
-    st.header("About")
-    st.write("Calls your FastAPI endpoints: `/ask`, `/voice_ask`.")
+st.title("🗣️ Multimodal RAG Agent (LangGraph)")
+tab1, tab2 = st.tabs(["Text Q&A", "Voice Q&A"])
 
-tab_text, tab_voice = st.tabs(["💬 Text Q&A", "🎙️ Voice Q&A"])
+with tab1:
+    q = st.text_input("Ask a question")
+    tts = st.checkbox("Read answer aloud (TTS)", value=False)
+    if st.button("Ask", use_container_width=True) and q.strip():
+        res = requests.get(f"{API_BASE}/ask", params={"q": q, "tts": tts}).json()
+        st.write("**Route:**", res.get("route"))
+        if res.get("strength"):
+            st.write("**Context strength:**", res["strength"])
+        if res.get("refused"):
+            st.warning("Refused due to weak context.")
+        st.markdown("**Answer:**")
+        st.write(res.get("answer", ""))
+        if res.get("tts_path"):
+            try:
+                audio_bytes = open(res["tts_path"], "rb").read()
+                st.audio(audio_bytes, format="audio/wav")
+            except Exception:
+                pass
+        with st.expander("Raw response"):
+            st.json(res)
 
-with tab_text:
-    st.subheader("Ask a question (text)")
-    q = st.text_input("Your question", placeholder="How do I import a WireGuard tunnel on Windows?")
-    col1, col2 = st.columns([1,1])
-    with col1:
-        do_get = st.button("Ask (GET)")
-    with col2:
-        do_post = st.button("Ask (POST JSON)")
+with tab2:
+    tts2 = st.checkbox("Read answer aloud (TTS)", value=True, key="tts2")
+    file = st.file_uploader("Upload audio file (wav/mp3/m4a)", type=["wav","mp3","m4a"])
+    if st.button("Transcribe & Ask", use_container_width=True) and file:
+        files = {"file": (file.name, file.getvalue(), file.type)}
+        res = requests.post(f"{API_BASE}/voice_ask", files=files, params={"tts": tts2}).json()
+        st.write("**Transcript:**", res.get("transcript",""))
+        st.write("**Route:**", res.get("route"))
+        if res.get("strength"):
+            st.write("**Context strength:**", res["strength"])
+        if res.get("refused"):
+            st.warning("Refused due to weak context.")
+        st.markdown("**Answer:**")
+        st.write(res.get("answer", ""))
+        if res.get("tts_path"):
+            try:
+                audio_bytes = open(res["tts_path"], "rb").read()
+                st.audio(audio_bytes, format="audio/wav")
+            except Exception:
+                pass
+        with st.expander("Raw response"):
+            st.json(res)
 
-    if (do_get or do_post) and q.strip():
-        try:
-            if do_get:
-                res = requests.get(f"{api_base}/ask", params={"q": q}, timeout=120)
-            else:
-                res = requests.post(f"{api_base}/ask", json={"question": q}, timeout=120)
-            res.raise_for_status()
-            data = res.json()
-            st.success("Answer")
-            st.write(data.get("answer", ""))
-            with st.expander("Raw response"):
-                st.json(data)
-        except Exception as e:
-            st.error(f"Request failed: {e}")
+st.sidebar.header("Runbook")
+st.sidebar.code("""
+# 1) Index
+python ingest.py
 
-with tab_voice:
-    st.subheader("Ask by voice (upload an audio file)")
-    st.caption("Tip: short clips (5–20s), 16 kHz mono WAV work best. mp3/m4a also OK.")
-    file = st.file_uploader("Choose an audio file", type=["wav","mp3","m4a","ogg","webm"], accept_multiple_files=False)
-    if file is not None:
-        st.audio(file)
-    if st.button("Transcribe & answer", disabled=file is None):
-        try:
-            # Stream file as multipart
-            files = {"file": (file.name, file.getbuffer(), "application/octet-stream")}
-            res = requests.post(f"{api_base}/voice_ask", files=files, timeout=300)
-            res.raise_for_status()
-            data = res.json()
-            st.success("Answer")
-            st.write(data.get("answer",""))
-            st.caption(f"Transcribed question: {data.get('question','')}")
-            with st.expander("Raw response"):
-                st.json(data)
-        except Exception as e:
-            st.error(f"Request failed: {e}")
+# 2) Backend
+uvicorn app:app --reload
+
+# 3) Frontend
+streamlit run streamlit_app.py
+""")
